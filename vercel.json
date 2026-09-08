@@ -1,0 +1,13 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/api/about" },
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/.well-known/xagent-verification.json", "destination": "/api/verification" },
+    { "source": "/v1/state", "destination": "/api/state" }
+  ],
+  "functions": {
+    "api/*.mjs": {
+      "runtime": "nodejs22.x"
+    }
+  }
+}
