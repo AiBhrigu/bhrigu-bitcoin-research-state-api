@@ -8,7 +8,7 @@ import { healthPayload, verificationPayload, SLUG } from "../lib/runtime.mjs";
 process.env.BHRIGU_COMMIT = "a".repeat(40);
 
 const fakeFetch = async (url) => {
-  if (String(url).includes("api.binance.com")) {
+  if (String(url).includes("data-api.binance.vision")) {
     return new Response(JSON.stringify({
       lastPrice: "79000.00",
       priceChangePercent: "1.25",
@@ -57,7 +57,7 @@ const root = path.resolve(here, "..");
 const liveSource = fs.readFileSync(path.join(root, "lib/live.mjs"), "utf8");
 const urls = [...liveSource.matchAll(/https:\/\/[^"\s]+/g)].map((m) => m[0]);
 assert.deepEqual(urls.sort(), [
-  "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
+  "https://data-api.binance.vision/api/v3/ticker/24hr?symbol=BTCUSDT",
   "https://mempool.space/api/blocks/tip/height"
 ].sort());
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
