@@ -12,11 +12,11 @@ The original `lib/window.mjs` was committed before the boundary and remains byte
 
 Boundary: `2026-09-10T00:00:00Z`.
 
-A post-boundary reality observation is now stored in `lib/evidence.mjs`. It records the live runtime observation, exact runtime commit, direct Binance cross-check, and the limitation that an independent protocol-height probe timed out.
+A post-boundary reality observation is now stored in `lib/evidence.mjs` and mirrored as `evidence/SEP_10_2026_POSTBOUNDARY.json`. CI pins the evidence artifact SHA-256 `80bc4e19efa6858371559815a08fbc6224a34c751658d410d6aa7d6ad3b57027`. It records the live runtime observation, exact runtime commit, direct Binance cross-check, and the limitation that an independent protocol-height probe timed out.
 
 ## SEP_17_2026
 
-`lib/window-sep17.mjs` is the second genuine future precommit. Its baseline was captured on 2026-09-10, seven days before the boundary. No post-boundary evidence exists yet. After the boundary, any evidence must be appended; the baseline must not be rewritten.
+`lib/window-sep17.mjs` is the second genuine future precommit. Its public proof artifact `evidence/SEP_17_2026_PRECOMMIT.json` is pinned to SHA-256 `19a27baa6c5f55efbfda84782cf4920374c82323f13f6eabce7d63ed2f0a13f2`. Its baseline was captured on 2026-09-10, seven days before the boundary. No post-boundary evidence exists yet. After the boundary, any evidence must be appended; the baseline must not be rewritten.
 
 ## Agent value
 
