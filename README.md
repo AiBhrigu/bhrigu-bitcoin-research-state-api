@@ -29,7 +29,12 @@ The first real experiment, `SEP_10_2026`, crossed its boundary without rewriting
 - `bhrigu_get_temporal_window`
 - `bhrigu_compare_window_to_reality`
 
-All tools are read-only. There is no trading, wallet, payment, transfer, withdrawal, credential, or private-account authority.
+The MCP endpoint serves both lifecycle eras on the same URL:
+
+- modern `2026-07-28`: handshake-free `server/discover`, per-request protocol/capability envelope, `Mcp-Method`/`Mcp-Name` header validation, complete-result discrimination, and explicit cache hints;
+- legacy `2025-11-25` / `2025-03-26`: `initialize` compatibility for existing clients.
+
+See `docs/MCP_PROTOCOL.md` for the exact transport contract. All tools are read-only. There is no trading, wallet, payment, transfer, withdrawal, credential, or private-account authority.
 
 ## Verification
 
