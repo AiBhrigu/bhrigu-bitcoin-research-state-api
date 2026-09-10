@@ -1,60 +1,64 @@
-# BHRIGU Bitcoin Research State API
+# BHRIGU Bitcoin Temporal Evidence
 
-A bounded, read-only Bitcoin research capability built for the X-Agent Open Innovation track.
+A bounded, read-only Bitcoin research capability for AI agents.
 
-It turns public Bitcoin evidence into one agent-callable research-state object:
+It turns public Bitcoin evidence into a repeatable temporal record:
 
-`FIELD → WINDOW → REALITY → MEMORY`
+`FIELD → WINDOW → REALITY → MEMORY → NEXT WINDOW`
 
-## What it returns
+## Why this is different
 
-- live Binance Spot BTCUSDT market state;
-- Bitcoin protocol-time coordinates;
-- source and freshness evidence;
-- the precommitted Sep 10, 2026 observation boundary;
-- current-vs-baseline delta;
-- explicit confirmation/invalidation phase;
-- zero trading, wallet, payment, transfer, or private-account authority.
+A live-price endpoint tells an agent what is true now. BHRIGU also preserves what was fixed **before a declared future boundary**, then lets the agent compare that immutable precommit with later reality.
 
-## API
+The first real experiment, `SEP_10_2026`, crossed its boundary without rewriting the baseline. A durable post-boundary observation is included. `SEP_17_2026` is the second genuine future precommit.
 
-`GET /v1/state`
+## Public interfaces
 
-Optional query: `?symbol=BTCUSDT`.
+- `GET /v1/state` — live BTCUSDT + protocol-time state and temporal summary
+- `GET /v1/windows` — list precommitted windows
+- `GET /v1/windows/{id}` — one frozen window and durable evidence
+- `POST /mcp` — stateless Streamable HTTP MCP JSON-RPC
+- `GET /openapi.json` — HTTP contract
+- `GET /health` — exact deployed commit
+- `GET /.well-known/xagent-verification.json` — slug + exact deployed commit
 
-`GET /health`
+## MCP tools
 
-Returns the exact deployed Git commit.
+- `bhrigu_get_bitcoin_research_state`
+- `bhrigu_list_temporal_windows`
+- `bhrigu_get_temporal_window`
+- `bhrigu_compare_window_to_reality`
 
-`GET /.well-known/xagent-verification.json`
+The MCP endpoint serves both lifecycle eras on the same URL:
 
-Returns the X-Agent slug and exact deployed Git commit.
+- modern `2026-07-28`: handshake-free `server/discover`, per-request protocol/capability envelope, `Mcp-Method`/`Mcp-Name` header validation, complete-result discrimination, and explicit cache hints;
+- legacy `2025-11-25` / `2025-03-26`: `initialize` compatibility for existing clients.
 
-## Local run
+See `docs/MCP_PROTOCOL.md` for the exact transport contract. All tools are read-only. There is no trading, wallet, payment, transfer, withdrawal, credential, or private-account authority.
 
-Requires Node.js 22+.
+## Verification
 
 ```bash
-npm test
+npm ci
+npm run check
 npm start
-curl http://localhost:3000/v1/state
 ```
 
-No API key or account credential is required.
+For review, follow `docs/AGENT_WORKFLOW.md` for the exact three-step agent path and `docs/OPERATING_PROOF.md` for commit binding, failure behavior, and the reviewer challenge. See `docs/TEMPORAL_EVIDENCE.md` for the immutable-window contract and `docs/SCORECARD.md` for scorecard evidence.
 
 ## Public data dependencies
 
-- Binance public Spot 24h ticker for BTCUSDT.
-- mempool.space public Bitcoin tip-height endpoint.
+- Binance public Spot BTCUSDT 24h ticker
+- mempool.space public Bitcoin tip height
 
-If the Binance market source is unavailable, the capability fails closed instead of fabricating a live state. Protocol tip-height failure is exposed as unavailable while the frozen protocol epoch metadata remains explicit.
+Market-source failure is fail-closed. Protocol-height failure is exposed as unavailable rather than silently substituted.
 
 ## IP boundary
 
-This repository contains only the bounded public adapter and its frozen public research record. It does not contain ORION, private prompts, planners, evaluators, private corpora, unpublished reconstruction logic, credentials, account state, wallet code, payment code, or trading execution.
+This repository contains only the bounded public adapter and public evidence records. It does not contain ORION, private prompts, planners, evaluators, private corpora, unpublished research methods, credentials, account state, wallet code, payment code, or trading execution.
 
 See `IP_BOUNDARY.md`.
 
 ## License / rights
 
-No general open-source license is granted by this repository. Any future X-Agent hackathon submission will use only the explicit rights declaration required for the submitted public artifact.
+No general open-source license is granted by this repository. X-Agent review/archive rights apply only to the bounded submitted artifact when explicitly declared.
