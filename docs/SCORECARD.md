@@ -21,13 +21,16 @@ BHRIGU gives agents a compact answer to a problem ordinary live-price tools cann
 - exact deployment commit binding;
 - CI on push and pull request;
 - acceptance, temporal, MCP, and immutable-baseline tests;
-- pinned SHA-256 for the original SEP_10 source file;
+- pinned SHA-256 for the original SEP_10 source file and committed evidence artifacts;
 - public OpenAPI contract;
-- typed JSON-RPC errors and bounded tool schemas.
+- typed JSON-RPC errors and bounded tool schemas;
+- header/body mismatch checks for modern MCP traffic.
 
 ## MCP productization
 
-The stateless `/mcp` endpoint implements JSON-RPC 2.0 initialize, ping, notifications, tools/list, and tools/call. Four tools expose live state, window discovery, durable evidence retrieval, and live comparison. Every tool is read-only and explicitly non-destructive.
+The same stateless `/mcp` endpoint serves both MCP lifecycle eras. Modern `2026-07-28` requests use handshake-free `server/discover`, per-request protocol/capability metadata, header-based routing validation, `resultType: complete`, and explicit cache hints. Existing `2025-11-25` / `2025-03-26` clients retain `initialize` compatibility.
+
+Four tools expose live state, window discovery, durable evidence retrieval, and live comparison. Every tool is read-only and explicitly non-destructive. See `docs/MCP_PROTOCOL.md` for the exact contract.
 
 ## Operational and adoption potential
 
