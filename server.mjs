@@ -28,7 +28,14 @@ http.createServer(async (req, res) => {
   if (url.pathname === "/mcp") {
     if (req.method !== "POST") return json(res, 405, { error: "METHOD_NOT_ALLOWED", allowed: ["POST"] });
     try {
-      const result = await handleMcpRpc(await readJson(req));
+      const result = await handleMcpRpc(await readJson(req), {
+        transportMeta: {
+          requireHeaders: true,
+          protocolVersion: req.headers["mcp-protocol-version"] ?? null,
+          method: req.headers["mcp-method"] ?? null,
+          name: req.headers["mcp-name"] ?? null
+        }
+      });
       if (result.status === 202) return json(res, 202, null);
       return json(res, result.status, result.body);
     } catch {
