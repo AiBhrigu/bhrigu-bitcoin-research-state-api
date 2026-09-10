@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Local HTTP and MCP smoke
+        run: |
+          BHRIGU_COMMIT="$GITHUB_SHA" npm start > /tmp/bhrigu.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          for n in $(seq 1 20); do
+            curl -fsS http://127.0.0.1:3000/health > /tmp/health.json && break
+            sleep 1
+          done
+          node --input-type=module -e 'const h=JSON.parse(await (await fetch("http://127.0.0.1:3000/health")).text()); if(h.commit!==process.env.GITHUB_SHA) process.exit(1)'
+          curl -fsS http://127.0.0.1:3000/v1/windows > /tmp/windows.json
+          curl -fsS -X POST http://127.0.0.1:3000/mcp -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' > /tmp/mcp.json
+          node --input-type=module -e 'const d=JSON.parse(await (await fetch("http://127.0.0.1:3000/v1/windows")).text()); if(d.window_count!==2||d.durable_evidence_count!==1) process.exit(1)'
