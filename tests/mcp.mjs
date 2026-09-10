@@ -3,6 +3,7 @@ import {
   handleMcpRpc,
   MCP_TOOLS,
   MCP_MODERN_PROTOCOL_VERSION,
+  MCP_MODERN_DISCOVERY_VERSIONS,
   MCP_SUPPORTED_PROTOCOL_VERSIONS
 } from "../lib/mcp.mjs";
 
@@ -47,6 +48,12 @@ const legacyList = await handleMcpRpc({ jsonrpc: "2.0", id: 2, method: "tools/li
 eq(legacyList.status, 200);
 eq(legacyList.body.result.tools.length, 4);
 eq(legacyList.body.result.ttlMs, undefined);
+const legacyHeaderList = await handleMcpRpc(
+  { jsonrpc: "2.0", id: 21, method: "tools/list" },
+  { fetchImpl: fakeFetch, now, transportMeta: { requireHeaders: true, protocolVersion: "2025-11-25", method: "tools/list", name: null } }
+);
+eq(legacyHeaderList.status, 200);
+eq(legacyHeaderList.body.result.resultType, undefined);
 
 const discover = await handleMcpRpc({
   jsonrpc: "2.0", id: 3, method: "server/discover", params: { _meta: modernMeta }
@@ -55,10 +62,9 @@ eq(discover.status, 200);
 eq(discover.body.result.resultType, "complete");
 eq(discover.body.result.ttlMs, 300000);
 eq(discover.body.result.cacheScope, "public");
-eq(discover.body.result.supportedVersions[0], MCP_MODERN_PROTOCOL_VERSION);
-eq(discover.body.result.supportedVersions.includes("2025-11-25"), true);
+deep(discover.body.result.supportedVersions, MCP_MODERN_DISCOVERY_VERSIONS);
+eq(discover.body.result.serverInfo, undefined);
 eq(discover.body.result._meta["io.modelcontextprotocol/serverInfo"].name, "bhrigu-bitcoin-research-state-api");
-deep(discover.body.result.supportedVersions, MCP_SUPPORTED_PROTOCOL_VERSIONS);
 
 const list = await handleMcpRpc({
   jsonrpc: "2.0", id: 4, method: "tools/list", params: { _meta: modernMeta }
@@ -70,6 +76,15 @@ deep(list.body.result.tools.map((t) => t.name), MCP_TOOLS.map((t) => t.name));
 eq(list.body.result.tools.every((t) => t.annotations.readOnlyHint === true), true);
 eq(list.body.result.ttlMs, 300000);
 eq(list.body.result.cacheScope, "public");
+
+const noClientInfo = await handleMcpRpc({
+  jsonrpc: "2.0", id: 41, method: "tools/list",
+  params: { _meta: {
+    "io.modelcontextprotocol/protocolVersion": MCP_MODERN_PROTOCOL_VERSION,
+    "io.modelcontextprotocol/clientCapabilities": {}
+  } }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/list") });
+eq(noClientInfo.status, 200);
 
 const windowResult = await handleMcpRpc({
   jsonrpc: "2.0", id: 5, method: "tools/call",
@@ -110,6 +125,8 @@ const unsupported = await handleMcpRpc({
 }, { fetchImpl: fakeFetch, now, transportMeta: { ...modernTransport("server/discover"), protocolVersion: "2099-01-01" } });
 eq(unsupported.status, 400);
 eq(unsupported.body.error.code, -32022);
+eq(unsupported.body.error.data.requested, "2099-01-01");
+deep(unsupported.body.error.data.supported, MCP_SUPPORTED_PROTOCOL_VERSIONS);
 
 const unsupportedOrdinary = await handleMcpRpc({
   jsonrpc: "2.0", id: 10, method: "tools/list",
@@ -117,6 +134,27 @@ const unsupportedOrdinary = await handleMcpRpc({
 }, { fetchImpl: fakeFetch, now, transportMeta: { ...modernTransport("tools/list"), protocolVersion: "2099-01-01" } });
 eq(unsupportedOrdinary.status, 400);
 eq(unsupportedOrdinary.body.error.code, -32022);
+eq(unsupportedOrdinary.body.error.data.requested, "2099-01-01");
+
+const unsupportedHeaderOnly = await handleMcpRpc(
+  { jsonrpc: "2.0", id: 101, method: "tools/list" },
+  { fetchImpl: fakeFetch, now, transportMeta: { requireHeaders: true, protocolVersion: "2099-01-01", method: "tools/list", name: null } }
+);
+eq(unsupportedHeaderOnly.status, 400);
+eq(unsupportedHeaderOnly.body.error.code, -32022);
+eq(unsupportedHeaderOnly.body.error.data.requested, "2099-01-01");
+
+const modernPing = await handleMcpRpc({
+  jsonrpc: "2.0", id: 102, method: "ping", params: { _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("ping") });
+eq(modernPing.status, 404);
+eq(modernPing.body.error.code, -32601);
+
+const modernNotification = await handleMcpRpc({
+  jsonrpc: "2.0", method: "notifications/example", params: { _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: { requireHeaders: true } });
+eq(modernNotification.status, 202);
+eq(modernNotification.body, null);
 
 const bad = await handleMcpRpc({
   jsonrpc: "2.0", id: 11, method: "tools/call",
@@ -129,4 +167,4 @@ const invalid = await handleMcpRpc({ hello: "world" });
 eq(invalid.status, 400);
 eq(invalid.body.error.code, -32600);
 
-console.log(JSON.stringify({ schema: "bhrigu_mcp_tests_v0_2", status: "PASS", checks }));
+console.log(JSON.stringify({ schema: "bhrigu_mcp_tests_v0_3", status: "PASS", checks }));
