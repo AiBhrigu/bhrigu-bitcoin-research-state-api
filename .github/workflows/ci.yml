@@ -30,5 +30,20 @@ jobs:
           done
           node --input-type=module -e 'const h=JSON.parse(await (await fetch("http://127.0.0.1:3000/health")).text()); if(h.commit!==process.env.GITHUB_SHA) process.exit(1)'
           curl -fsS http://127.0.0.1:3000/v1/windows > /tmp/windows.json
-          curl -fsS -X POST http://127.0.0.1:3000/mcp -H 'content-type: application/json' --data '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' > /tmp/mcp.json
-          node --input-type=module -e 'const d=JSON.parse(await (await fetch("http://127.0.0.1:3000/v1/windows")).text()); if(d.window_count!==2||d.durable_evidence_count!==1) process.exit(1)'
+          curl -fsS -X POST http://127.0.0.1:3000/mcp \
+            -H 'content-type: application/json' \
+            -H 'MCP-Protocol-Version: 2026-07-28' \
+            -H 'Mcp-Method: server/discover' \
+            --data '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{},"io.modelcontextprotocol/clientInfo":{"name":"ci","version":"1.0.0"}}}}' > /tmp/discover.json
+          curl -fsS -X POST http://127.0.0.1:3000/mcp \
+            -H 'content-type: application/json' \
+            -H 'MCP-Protocol-Version: 2026-07-28' \
+            -H 'Mcp-Method: tools/list' \
+            --data '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' > /tmp/mcp-modern.json
+          curl -fsS -X POST http://127.0.0.1:3000/mcp \
+            -H 'content-type: application/json' \
+            -H 'MCP-Protocol-Version: 2026-07-28' \
+            -H 'Mcp-Method: tools/call' \
+            -H 'Mcp-Name: bhrigu_get_temporal_window' \
+            --data '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"bhrigu_get_temporal_window","arguments":{"window_id":"SEP_10_2026"},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' > /tmp/mcp-call.json
+          node --input-type=module -e 'import fs from "node:fs"; const w=JSON.parse(fs.readFileSync("/tmp/windows.json")); const d=JSON.parse(fs.readFileSync("/tmp/discover.json")); const l=JSON.parse(fs.readFileSync("/tmp/mcp-modern.json")); const c=JSON.parse(fs.readFileSync("/tmp/mcp-call.json")); if(w.window_count!==2||w.durable_evidence_count!==1||d.result.resultType!=="complete"||!d.result.supportedVersions.includes("2026-07-28")||l.result.tools.length!==4||l.result.ttlMs!==300000||c.result.structuredContent.window.id!=="SEP_10_2026") process.exit(1)'
