@@ -111,8 +111,15 @@ const unsupported = await handleMcpRpc({
 eq(unsupported.status, 400);
 eq(unsupported.body.error.code, -32022);
 
+const unsupportedOrdinary = await handleMcpRpc({
+  jsonrpc: "2.0", id: 10, method: "tools/list",
+  params: { _meta: { ...modernMeta, "io.modelcontextprotocol/protocolVersion": "2099-01-01" } }
+}, { fetchImpl: fakeFetch, now, transportMeta: { ...modernTransport("tools/list"), protocolVersion: "2099-01-01" } });
+eq(unsupportedOrdinary.status, 400);
+eq(unsupportedOrdinary.body.error.code, -32022);
+
 const bad = await handleMcpRpc({
-  jsonrpc: "2.0", id: 10, method: "tools/call",
+  jsonrpc: "2.0", id: 11, method: "tools/call",
   params: { name: "bhrigu_get_temporal_window", arguments: { window_id: "NOPE" }, _meta: modernMeta }
 }, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/call", "bhrigu_get_temporal_window") });
 eq(bad.body.result.isError, true);
