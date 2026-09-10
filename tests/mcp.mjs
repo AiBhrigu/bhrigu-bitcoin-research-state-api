@@ -1,5 +1,14 @@
 import assert from "node:assert/strict";
-import { handleMcpRpc, MCP_TOOLS } from "../lib/mcp.mjs";
+import {
+  handleMcpRpc,
+  MCP_TOOLS,
+  MCP_MODERN_PROTOCOL_VERSION,
+  MCP_SUPPORTED_PROTOCOL_VERSIONS
+} from "../lib/mcp.mjs";
+
+let checks = 0;
+const eq = (actual, expected, message) => { assert.equal(actual, expected, message); checks += 1; };
+const deep = (actual, expected, message) => { assert.deepEqual(actual, expected, message); checks += 1; };
 
 const fakeFetch = async (url) => {
   if (String(url).includes("data-api.binance.vision")) {
@@ -16,43 +25,101 @@ const fakeFetch = async (url) => {
   throw new Error("UNEXPECTED_URL");
 };
 const now = new Date("2026-09-16T12:00:30Z");
+const modernMeta = {
+  "io.modelcontextprotocol/protocolVersion": MCP_MODERN_PROTOCOL_VERSION,
+  "io.modelcontextprotocol/clientCapabilities": {},
+  "io.modelcontextprotocol/clientInfo": { name: "bhrigu-test", version: "1.0.0" }
+};
+const modernTransport = (method, name = null) => ({
+  requireHeaders: true,
+  protocolVersion: MCP_MODERN_PROTOCOL_VERSION,
+  method,
+  name
+});
 
 const init = await handleMcpRpc({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25" } }, { fetchImpl: fakeFetch, now });
-assert.equal(init.status, 200);
-assert.equal(init.body.result.protocolVersion, "2025-11-25");
-assert.equal(init.body.result.serverInfo.version, "0.2.0");
+eq(init.status, 200);
+eq(init.body.result.protocolVersion, "2025-11-25");
+eq(init.body.result.serverInfo.version, "0.2.0");
+eq(init.body.result.resultType, undefined);
 
-const list = await handleMcpRpc({ jsonrpc: "2.0", id: 2, method: "tools/list" }, { fetchImpl: fakeFetch, now });
-assert.equal(list.body.result.tools.length, 4);
-assert.deepEqual(list.body.result.tools.map((t) => t.name), MCP_TOOLS.map((t) => t.name));
-assert.equal(list.body.result.tools.every((t) => t.annotations.readOnlyHint === true), true);
+const legacyList = await handleMcpRpc({ jsonrpc: "2.0", id: 2, method: "tools/list" }, { fetchImpl: fakeFetch, now });
+eq(legacyList.status, 200);
+eq(legacyList.body.result.tools.length, 4);
+eq(legacyList.body.result.ttlMs, undefined);
+
+const discover = await handleMcpRpc({
+  jsonrpc: "2.0", id: 3, method: "server/discover", params: { _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("server/discover") });
+eq(discover.status, 200);
+eq(discover.body.result.resultType, "complete");
+eq(discover.body.result.ttlMs, 300000);
+eq(discover.body.result.cacheScope, "public");
+eq(discover.body.result.supportedVersions[0], MCP_MODERN_PROTOCOL_VERSION);
+eq(discover.body.result.supportedVersions.includes("2025-11-25"), true);
+eq(discover.body.result._meta["io.modelcontextprotocol/serverInfo"].name, "bhrigu-bitcoin-research-state-api");
+deep(discover.body.result.supportedVersions, MCP_SUPPORTED_PROTOCOL_VERSIONS);
+
+const list = await handleMcpRpc({
+  jsonrpc: "2.0", id: 4, method: "tools/list", params: { _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/list") });
+eq(list.status, 200);
+eq(list.body.result.resultType, "complete");
+eq(list.body.result.tools.length, 4);
+deep(list.body.result.tools.map((t) => t.name), MCP_TOOLS.map((t) => t.name));
+eq(list.body.result.tools.every((t) => t.annotations.readOnlyHint === true), true);
+eq(list.body.result.ttlMs, 300000);
+eq(list.body.result.cacheScope, "public");
 
 const windowResult = await handleMcpRpc({
-  jsonrpc: "2.0", id: 3, method: "tools/call",
-  params: { name: "bhrigu_get_temporal_window", arguments: { window_id: "SEP_10_2026" } }
-}, { fetchImpl: fakeFetch, now });
-assert.equal(windowResult.body.result.isError, false);
-assert.equal(windowResult.body.result.structuredContent.window.id, "SEP_10_2026");
-assert.equal(windowResult.body.result.structuredContent.evidence.length, 1);
+  jsonrpc: "2.0", id: 5, method: "tools/call",
+  params: { name: "bhrigu_get_temporal_window", arguments: { window_id: "SEP_10_2026" }, _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/call", "bhrigu_get_temporal_window") });
+eq(windowResult.status, 200);
+eq(windowResult.body.result.resultType, "complete");
+eq(windowResult.body.result.isError, false);
+eq(windowResult.body.result.structuredContent.window.id, "SEP_10_2026");
+eq(windowResult.body.result.structuredContent.evidence.length, 1);
 
 const compare = await handleMcpRpc({
-  jsonrpc: "2.0", id: 4, method: "tools/call",
-  params: { name: "bhrigu_compare_window_to_reality", arguments: { window_id: "SEP_17_2026" } }
-}, { fetchImpl: fakeFetch, now });
-assert.equal(compare.body.result.isError, false);
-assert.equal(compare.body.result.structuredContent.current_btcusdt, 79000);
-assert.equal(compare.body.result.structuredContent.baseline_btcusdt, 78348.09);
-assert.equal(compare.body.result.structuredContent.trading_authority, false);
+  jsonrpc: "2.0", id: 6, method: "tools/call",
+  params: { name: "bhrigu_compare_window_to_reality", arguments: { window_id: "SEP_17_2026" }, _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/call", "bhrigu_compare_window_to_reality") });
+eq(compare.body.result.isError, false);
+eq(compare.body.result.resultType, "complete");
+eq(compare.body.result.structuredContent.current_btcusdt, 79000);
+eq(compare.body.result.structuredContent.baseline_btcusdt, 78348.09);
+eq(compare.body.result.structuredContent.trading_authority, false);
+
+const headerMismatch = await handleMcpRpc({
+  jsonrpc: "2.0", id: 7, method: "tools/list", params: { _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/call") });
+eq(headerMismatch.status, 400);
+eq(headerMismatch.body.error.code, -32020);
+
+const missingCaps = await handleMcpRpc({
+  jsonrpc: "2.0", id: 8, method: "server/discover",
+  params: { _meta: { "io.modelcontextprotocol/protocolVersion": MCP_MODERN_PROTOCOL_VERSION } }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("server/discover") });
+eq(missingCaps.status, 400);
+eq(missingCaps.body.error.code, -32021);
+
+const unsupported = await handleMcpRpc({
+  jsonrpc: "2.0", id: 9, method: "server/discover",
+  params: { _meta: { ...modernMeta, "io.modelcontextprotocol/protocolVersion": "2099-01-01" } }
+}, { fetchImpl: fakeFetch, now, transportMeta: { ...modernTransport("server/discover"), protocolVersion: "2099-01-01" } });
+eq(unsupported.status, 400);
+eq(unsupported.body.error.code, -32022);
 
 const bad = await handleMcpRpc({
-  jsonrpc: "2.0", id: 5, method: "tools/call",
-  params: { name: "bhrigu_get_temporal_window", arguments: { window_id: "NOPE" } }
-}, { fetchImpl: fakeFetch, now });
-assert.equal(bad.body.result.isError, true);
-assert.equal(bad.body.result.structuredContent.error.code, "WINDOW_NOT_FOUND");
+  jsonrpc: "2.0", id: 10, method: "tools/call",
+  params: { name: "bhrigu_get_temporal_window", arguments: { window_id: "NOPE" }, _meta: modernMeta }
+}, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/call", "bhrigu_get_temporal_window") });
+eq(bad.body.result.isError, true);
+eq(bad.body.result.structuredContent.error.code, "WINDOW_NOT_FOUND");
 
 const invalid = await handleMcpRpc({ hello: "world" });
-assert.equal(invalid.status, 400);
-assert.equal(invalid.body.error.code, -32600);
+eq(invalid.status, 400);
+eq(invalid.body.error.code, -32600);
 
-console.log(JSON.stringify({ schema: "bhrigu_mcp_tests_v0_1", status: "PASS", checks: 14 }));
+console.log(JSON.stringify({ schema: "bhrigu_mcp_tests_v0_2", status: "PASS", checks }));
