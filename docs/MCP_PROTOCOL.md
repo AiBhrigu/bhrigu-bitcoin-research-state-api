@@ -14,11 +14,11 @@ Every modern non-notification HTTP request carries:
 - `_meta.io.modelcontextprotocol/protocolVersion = 2026-07-28`
 - `_meta.io.modelcontextprotocol/clientCapabilities`
 
-`_meta.io.modelcontextprotocol/clientInfo` is accepted and recommended but is not required. Notification POSTs are exempt from the standard-header presence check.
+`_meta.io.modelcontextprotocol/clientInfo` is recommended but optional; if present it must be well formed. Notification POSTs are exempt from the standard-header presence check.
 
-`server/discover` advertises the supported modern per-request revision. Modern results carry `resultType: "complete"`; server identity is stamped in `_meta.io.modelcontextprotocol/serverInfo`, and cacheable discovery/list results carry explicit `ttlMs` and `cacheScope` hints.
+`server/discover` advertises every protocol revision this endpoint supports so a client can negotiate the modern era or deliberately fall back to a legacy initialize-capable revision. Modern complete results carry `resultType: "complete"`; server identity is stamped in `_meta.io.modelcontextprotocol/serverInfo`, and cacheable discovery/list results carry explicit `ttlMs` and `cacheScope` hints.
 
-The server fails closed on header/body mismatches, missing required client capabilities, and unsupported versions. `-32022` errors return both the requested version and the supported-version set. Modern `initialize` and `ping` are not served because they belong to the handshake-era lifecycle.
+The server fails closed on malformed or missing required `_meta` fields (`-32602`), header/body mismatches (`-32020`), and unsupported protocol versions (`-32022`). `-32022` errors return both the requested revision and the supported-version set. The current BHRIGU tools require no optional client capability beyond the mandatory per-request `clientCapabilities` envelope, so they do not emit `-32021` in ordinary use. Modern `initialize` and `ping` are not served because they belong to the handshake-era lifecycle.
 
 ## Legacy era — 2025-11-25 / 2025-03-26
 
