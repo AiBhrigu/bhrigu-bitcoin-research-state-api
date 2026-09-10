@@ -44,7 +44,7 @@ npm run check
 npm start
 ```
 
-See `docs/TEMPORAL_EVIDENCE.md` for the immutable-window contract and `docs/SCORECARD.md` for reviewer evidence.
+For review, follow `docs/AGENT_WORKFLOW.md` for the exact three-step agent path and `docs/OPERATING_PROOF.md` for commit binding, failure behavior, and the reviewer challenge. See `docs/TEMPORAL_EVIDENCE.md` for the immutable-window contract and `docs/SCORECARD.md` for scorecard evidence.
 
 ## Public data dependencies
 
