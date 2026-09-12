@@ -1,5 +1,5 @@
 {
-  "name": "bhrigu-bitcoin-research-state-api",
+  "name": "bhrigu-olaxbt-strategy-evidence-agent",
   "version": "0.3.0",
   "type": "module",
   "description": "Read-only OlaXBT strategy-evidence agent with inherited Bitcoin temporal evidence for X-Agent.",

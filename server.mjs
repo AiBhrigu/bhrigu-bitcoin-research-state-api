@@ -76,9 +76,10 @@ http.createServer(async (req, res) => {
     return record ? json(res, 200, record) : json(res, 404, { error: "WINDOW_NOT_FOUND" });
   }
   if (url.pathname === "/") return json(res, 200, {
-    name: "BHRIGU Bitcoin Temporal Evidence",
-    endpoint: "/v1/state",
+    name: "BHRIGU Strategy Evidence Agent",
+    endpoint: "/v1/strategy-evidence",
     strategy_evidence: "/v1/strategy-evidence",
+    temporal_state: "/v1/state",
     windows: "/v1/windows",
     mcp: "/mcp",
     openapi: "/openapi.json",
@@ -90,4 +91,4 @@ http.createServer(async (req, res) => {
   }
   try { return json(res, 200, await buildState()); }
   catch (error) { return json(res, 502, { error: "PUBLIC_MARKET_SOURCE_UNAVAILABLE", detail: String(error.message || error), trading_authority: false }); }
-}).listen(port, () => console.log(`BHRIGU temporal evidence API listening on ${port}`));
+}).listen(port, () => console.log(`BHRIGU Strategy Evidence Agent listening on ${port}`));

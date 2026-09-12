@@ -3,9 +3,10 @@ import { methodGate, sendJson } from "../lib/http.mjs";
 export default function handler(req, res) {
   if (!methodGate(req, res)) return;
   sendJson(res, 200, {
-    name: "BHRIGU Bitcoin Temporal Evidence",
-    capability: "read-only precommit → reality → memory for Bitcoin research",
-    endpoint: "/v1/state",
+    name: "BHRIGU Strategy Evidence Agent",
+    capability: "Can an agent trust the evidence context behind this OlaXBT strategy signal right now?",
+    endpoint: "/v1/strategy-evidence",
+    temporal_state: "/v1/state",
     windows: "/v1/windows",
     mcp: "/mcp",
     openapi: "/openapi.json",
