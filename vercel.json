@@ -7,7 +7,6 @@
     { "source": "/mcp", "destination": "/api/mcp" },
     { "source": "/v1/state", "destination": "/api/state" },
     { "source": "/v1/strategy-evidence", "destination": "/api/strategy-evidence" },
-    { "source": "/_preview/olaxbt-probe", "destination": "/api/olaxbt-preview-probe" },
     { "source": "/v1/windows", "destination": "/api/windows" },
     { "source": "/v1/windows/:id", "destination": "/api/window?id=:id" }
   ]
