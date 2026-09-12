@@ -1,64 +1,52 @@
-# BHRIGU Bitcoin Temporal Evidence
+# BHRIGU OlaXBT Strategy Evidence Agent
 
-A bounded, read-only Bitcoin research capability for AI agents.
+**OLAXBT = strategy + signal authority.**
+**BHRIGU = evidence interpretation layer.**
 
-It turns public Bitcoin evidence into a repeatable temporal record:
+**Job:** Can an agent trust the evidence context behind this OlaXBT strategy signal right now?
 
-`FIELD → WINDOW → REALITY → MEMORY → NEXT WINDOW`
+The primary trading-track capability is a bounded, read-only evidence object around the current OlaXBT `BTC/USDT` strategy signal. It consumes the live signal, strategy metrics, recent trades, and equity context from OlaXBT Nexus MCP and surfaces support, contradictions, limitations, and evidence quality without creating a second trading signal.
 
-## Why this is different
+## Primary interfaces
 
-A live-price endpoint tells an agent what is true now. BHRIGU also preserves what was fixed **before a declared future boundary**, then lets the agent compare that immutable precommit with later reality.
-
-The first real experiment, `SEP_10_2026`, crossed its boundary without rewriting the baseline. A durable post-boundary observation is included. `SEP_17_2026` is the second genuine future precommit.
-
-## Public interfaces
-
-- `GET /v1/state` — live BTCUSDT + protocol-time state and temporal summary
-- `GET /v1/windows` — list precommitted windows
-- `GET /v1/windows/{id}` — one frozen window and durable evidence
-- `POST /mcp` — stateless Streamable HTTP MCP JSON-RPC
-- `GET /openapi.json` — HTTP contract
+- `POST /v1/strategy-evidence` — REST Strategy Evidence object
+- MCP tool `bhrigu_get_olaxbt_strategy_evidence` — the same bounded object for agents
 - `GET /health` — exact deployed commit
-- `GET /.well-known/xagent-verification.json` — slug + exact deployed commit
+- `GET /.well-known/xagent-verification.json` — trading-track submission slug + exact commit
 
-## MCP tools
+Input is exactly `{"symbol":"BTC/USDT"}`. OlaXBT signal direction is preserved from the observed upstream `trade_intent` field; BHRIGU never infers BUY/SELL/HOLD from reasoning text. OlaXBT backtest win rate is preserved from the observed upstream `win_rate_pct` field.
 
-- `bhrigu_get_bitcoin_research_state`
-- `bhrigu_list_temporal_windows`
-- `bhrigu_get_temporal_window`
-- `bhrigu_compare_window_to_reality`
+## Safety boundary
 
-The MCP endpoint serves both lifecycle eras on the same URL:
+Read-only. No order placement, exchange execution, wallet authority, payment authority, withdrawal, transfer, or second signal. Historical performance is evidence context, not a forecast. The OlaXBT Nexus credential is server-side only.
 
-- modern `2026-07-28`: handshake-free `server/discover`, per-request protocol/capability envelope, `Mcp-Method`/`Mcp-Name` header validation, complete-result discrimination, and explicit cache hints;
-- legacy `2025-11-25` / `2025-03-26`: `initialize` compatibility for existing clients.
+## Evidence sources
 
-See `docs/MCP_PROTOCOL.md` for the exact transport contract. All tools are read-only. There is no trading, wallet, payment, transfer, withdrawal, credential, or private-account authority.
+The Strategy Evidence object consumes exactly four OlaXBT Nexus tools:
 
-## Verification
+- `get_strategy_signal`
+- `get_strategy_metrics`
+- `get_strategy_trades`
+- `get_strategy_equity`
+
+Each source is reported independently under `source_status`; missing or contradictory evidence is surfaced rather than replaced.
+
+## Run and test
+
+Requires Node.js 22+.
 
 ```bash
 npm ci
-npm run check
+npm test
 npm start
 ```
 
-For review, follow `docs/AGENT_WORKFLOW.md` for the exact three-step agent path and `docs/OPERATING_PROOF.md` for commit binding, failure behavior, and the reviewer challenge. See `docs/TEMPORAL_EVIDENCE.md` for the immutable-window contract and `docs/SCORECARD.md` for scorecard evidence.
+The live Strategy Evidence call requires `OLAXBT_NEXUS_API_KEY` only in the server environment. Do not put it in Git, client code, fixtures, logs, or responses.
 
-## Public data dependencies
+## Inherited capability
 
-- Binance public Spot BTCUSDT 24h ticker
-- mempool.space public Bitcoin tip height
-
-Market-source failure is fail-closed. Protocol-height failure is exposed as unavailable rather than silently substituted.
+This repository also preserves the earlier BHRIGU Bitcoin Temporal Evidence capability and its read-only MCP tools. That inherited Open-Innovation capability remains available, but it is not the primary object of the OlaXBT trading-track submission.
 
 ## IP boundary
 
-This repository contains only the bounded public adapter and public evidence records. It does not contain ORION, private prompts, planners, evaluators, private corpora, unpublished research methods, credentials, account state, wallet code, payment code, or trading execution.
-
-See `IP_BOUNDARY.md`.
-
-## License / rights
-
-No general open-source license is granted by this repository. X-Agent review/archive rights apply only to the bounded submitted artifact when explicitly declared.
+Only the bounded public adapter is present. ORION core, private prompts, planners, evaluators, private corpora, unpublished methods, credentials, wallet/payment code, and trading execution are excluded.

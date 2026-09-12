@@ -31,12 +31,12 @@ const modernTransport = (method, name = null) => ({ requireHeaders: true, protoc
 const init = await handleMcpRpc({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-11-25" } }, { fetchImpl: fakeFetch, now });
 eq(init.status, 200);
 eq(init.body.result.protocolVersion, "2025-11-25");
-eq(init.body.result.serverInfo.version, "0.2.0");
+eq(init.body.result.serverInfo.version, "0.3.0");
 eq(init.body.result.resultType, undefined);
 
 const legacyList = await handleMcpRpc({ jsonrpc: "2.0", id: 2, method: "tools/list" }, { fetchImpl: fakeFetch, now });
 eq(legacyList.status, 200);
-eq(legacyList.body.result.tools.length, 4);
+eq(legacyList.body.result.tools.length, 5);
 eq(legacyList.body.result.ttlMs, undefined);
 
 const discover = await handleMcpRpc({ jsonrpc: "2.0", id: 3, method: "server/discover", params: { _meta: modernMeta } }, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("server/discover") });
@@ -46,12 +46,12 @@ eq(discover.body.result.ttlMs, 300000);
 eq(discover.body.result.cacheScope, "public");
 deep(discover.body.result.supportedVersions, MCP_SUPPORTED_PROTOCOL_VERSIONS);
 eq(discover.body.result.serverInfo, undefined);
-eq(discover.body.result._meta["io.modelcontextprotocol/serverInfo"].name, "bhrigu-bitcoin-research-state-api");
+eq(discover.body.result._meta["io.modelcontextprotocol/serverInfo"].name, "bhrigu-olaxbt-strategy-evidence-agent");
 
 const list = await handleMcpRpc({ jsonrpc: "2.0", id: 4, method: "tools/list", params: { _meta: modernMeta } }, { fetchImpl: fakeFetch, now, transportMeta: modernTransport("tools/list") });
 eq(list.status, 200);
 eq(list.body.result.resultType, "complete");
-eq(list.body.result.tools.length, 4);
+eq(list.body.result.tools.length, 5);
 deep(list.body.result.tools.map((t) => t.name), MCP_TOOLS.map((t) => t.name));
 eq(list.body.result.tools.every((t) => t.annotations.readOnlyHint === true), true);
 eq(list.body.result.ttlMs, 300000);

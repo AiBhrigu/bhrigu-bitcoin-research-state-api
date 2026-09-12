@@ -1,37 +1,25 @@
-# BHRIGU OlaXBT Strategy Evidence Agent — minimum vertical slice
+# OlaXBT Strategy Evidence — primary trading-track capability
 
-This branch adds one bounded, read-only capability for the OlaXBT × X-Agent trading track.
+## Authority split
 
-## Purpose
+- **OLAXBT:** strategy + signal authority.
+- **BHRIGU:** evidence interpretation layer.
+- **Job:** Can an agent trust the evidence context behind this OlaXBT strategy signal right now?
 
-`POST /v1/strategy-evidence` answers one question:
+BHRIGU does not generate a second signal. It preserves the observed OlaXBT direction and surrounds it with historical strategy evidence, recent behavior, equity context, contradictions, limitations, and source status.
 
-> How much historical strategy evidence supports the quality context around the current OlaXBT signal?
+## Observed upstream normalization
 
-It does **not** create a second BUY/SELL/HOLD signal, forecast price, execute a trade, access a wallet, or move funds.
+The live OlaXBT Nexus shapes observed for the bound strategy are normalized only from explicit source fields:
 
-## Server-side secret
+- `get_strategy_signal.content.trade_intent` → `signal.direction` (`BUY`, `SELL`, or `HOLD` when supplied).
+- `get_strategy_signal.content.confidence` → `signal.confidence`.
+- `get_strategy_signal.content.reasoning_log` → `signal.reasoning_log`.
+- `get_strategy_metrics.content.win_rate_pct` → `strategy_evidence.win_rate`.
 
-Set exactly one server environment variable:
+Reasoning text is never parsed to infer direction. Recent-trade positive share is never substituted for OlaXBT source win rate.
 
-```text
-OLAXBT_NEXUS_API_KEY=nxk_...
-```
-
-The key is sent only to the official OlaXBT Nexus endpoint as `X-API-KEY` and must never be committed, logged, returned to clients, or placed in frontend code.
-
-## Upstream tools
-
-The slice consumes exactly four OlaXBT Nexus tools:
-
-- `get_strategy_signal`
-- `get_strategy_metrics`
-- `get_strategy_trades`
-- `get_strategy_equity`
-
-`run_backtest` and trade execution are out of scope.
-
-## Request
+## REST
 
 ```http
 POST /v1/strategy-evidence
@@ -40,35 +28,31 @@ content-type: application/json
 {"symbol":"BTC/USDT"}
 ```
 
-Only `BTC/USDT` is supported in v0.1.
+## MCP
 
-## Output boundary
+Tool: `bhrigu_get_olaxbt_strategy_evidence`
 
-The response preserves the observed OlaXBT signal and returns normalized evidence context, recent-behavior context, equity context, source status, limitations, contradictions, and one of:
+Input schema: exactly `symbol = BTC/USDT`. Output is the same bounded Strategy Evidence object returned by REST.
 
-- `SUPPORTED`
-- `MIXED`
-- `WEAK`
-- `INSUFFICIENT`
+## Four upstream sources
 
-The assessment is explicitly historical evidence quality, not trading advice and not a new directional signal.
+1. `get_strategy_signal`
+2. `get_strategy_metrics`
+3. `get_strategy_trades`
+4. `get_strategy_equity`
 
-## Deterministic verification
+A source failure is reported under `source_status` and in `limitations`; evidence is never fabricated.
 
-```bash
-npm test
-```
+## Assessment enum
 
-The strategy-evidence tests cover success, unsupported symbol, missing server key, upstream authentication failure, partial upstream failure, and malformed upstream response.
+`SUPPORTED | MIXED | WEAK | INSUFFICIENT`
 
-## Real Nexus proof
+This evaluates evidence quality around the observed OlaXBT signal. It is not a new BUY/SELL/HOLD output and not a price forecast.
 
-With the server-side key configured on a preview deployment:
+## Secret boundary
 
-```bash
-curl -sS -X POST "$BASE_URL/v1/strategy-evidence" \
-  -H 'content-type: application/json' \
-  --data '{"symbol":"BTC/USDT"}'
-```
+The authorized Nexus credential exists only as the server environment variable `OLAXBT_NEXUS_API_KEY`. The repository contains no real credential value.
 
-PASS requires all four `source_status.*.ok` values to be true, an unmodified observed OlaXBT signal, and `authority.trade_execution=false`.
+## Forbidden
+
+No trading execution, wallet access, exchange credentials, payment, portfolio management, autonomous order loop, signal fabrication, or reasoning-text direction inference.

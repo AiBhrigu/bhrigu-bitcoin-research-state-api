@@ -1,41 +1,38 @@
-# X-Agent scorecard evidence
+# X-Agent OlaXBT judge-first scorecard
 
-## Real agent/user value
+## Primary product truth
 
-BHRIGU gives agents a compact answer to a problem ordinary live-price tools cannot solve: **what was known before a declared future boundary, what is true now, and what changed without rewriting the past?** The loop is reusable across multiple windows.
+**OLAXBT = strategy + signal authority.**
+**BHRIGU = evidence interpretation layer.**
+**Job = Can an agent trust the evidence context behind this OlaXBT strategy signal right now?**
 
-## Demonstrated capability quality
+## Hard-gate evidence
 
-- live Binance BTCUSDT market evidence;
-- Bitcoin protocol-time coordinates;
-- source freshness;
-- frozen precommit baselines;
-- durable post-boundary evidence;
-- explicit evidence limitations;
-- fail-closed market-source behavior;
-- no prediction or trading claim.
+| Gate | Evidence |
+| --- | --- |
+| Callable | REST `POST /v1/strategy-evidence`; MCP `bhrigu_get_olaxbt_strategy_evidence` |
+| Real | Four live OlaXBT Nexus sources: signal, metrics, trades, equity |
+| Reproducible | Node 22+, lockfile, deterministic tests, exact commit binding |
+| Safe | Read-only; no trading execution, wallet, payment, transfer, withdrawal, or second signal |
+| Useful for agents | One machine-readable evidence object with source status, contradictions, limitations, and explicit authority |
 
-## Engineering and maintainability
+## Score-maximizing evidence
 
-- zero npm runtime dependencies;
-- exact deployment commit binding;
-- CI on push and pull request;
-- acceptance, temporal, MCP, and immutable-baseline tests;
-- pinned SHA-256 for the original SEP_10 source file and committed evidence artifacts;
-- public OpenAPI contract;
-- typed JSON-RPC errors and bounded tool schemas;
-- header/body mismatch checks for modern MCP traffic.
+### Real agent/user value
+An agent does not merely receive a direction. It receives the evidence context needed to decide how much confidence to place in the *context* around an OlaXBT signal, while OlaXBT retains signal authority.
 
-## MCP productization
+### Demonstrated capability quality
+Observed upstream fields are normalized exactly: `trade_intent` supplies direction and `win_rate_pct` supplies OlaXBT source win rate. Direction is never inferred from prose, and recent-trade positive share is not substituted for source win rate. Four upstream source statuses are independently visible.
 
-The same stateless `/mcp` endpoint serves both MCP lifecycle eras. Modern `2026-07-28` requests use handshake-free `server/discover`, per-request protocol/capability metadata, header-based routing validation, `resultType: complete`, and explicit cache hints. Existing `2025-11-25` / `2025-03-26` clients retain `initialize` compatibility.
+### Engineering / maintainability
+The new MCP tool calls the same `buildStrategyEvidence()` path as REST, preventing two product implementations. No new runtime dependency or trading engine is introduced.
 
-Four tools expose live state, window discovery, durable evidence retrieval, and live comparison. Every tool is read-only and explicitly non-destructive. See `docs/MCP_PROTOCOL.md` for the exact contract.
+### MCP productization readiness
+Exactly one trading-track MCP tool is added: `bhrigu_get_olaxbt_strategy_evidence`. Input is constrained to `BTC/USDT`, output is structured and read-only, and authority flags are explicit.
 
-## Operational and adoption potential
+### Adoption / operating potential
+The capability is small enough for another agent to call directly, requires no caller credential, and keeps the upstream Nexus key server-side. Existing Bitcoin Temporal Evidence remains inherited context rather than the first-screen product object.
 
-The capability requires no user credential, wallet, API key, or account state. Agents can integrate it as a public evidence service. A second precommit (`SEP_17_2026`) proves the method is repeatable rather than a one-off demonstration.
+## Non-claims
 
-## Boundary
-
-The public artifact exposes only the bounded evidence adapter. ORION, private prompts, planners, evaluators, private corpora, unpublished research methods, credentials, wallets, payments, transfers, withdrawals, and trading execution remain excluded.
+No guarantee of profitability, future return, signal correctness, or trading outcome. No autonomous execution. No second BHRIGU signal.
