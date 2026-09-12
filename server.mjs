@@ -4,6 +4,7 @@ import { healthPayload, verificationPayload } from "./lib/runtime.mjs";
 import { getWindow, listWindows, temporalSummary } from "./lib/windows.mjs";
 import { handleMcpRpc } from "./lib/mcp.mjs";
 import { openapiPayload } from "./lib/openapi.mjs";
+import { buildStrategyEvidence } from "./lib/strategy-evidence.mjs";
 
 const port = Number(process.env.PORT || 3000);
 const json = (res, status, body) => {
@@ -43,6 +44,27 @@ http.createServer(async (req, res) => {
     }
   }
 
+  if (url.pathname === "/v1/strategy-evidence") {
+    if (req.method !== "POST") return json(res, 405, { error: "METHOD_NOT_ALLOWED", allowed: ["POST"] });
+    try {
+      const body = await readJson(req);
+      if (!body || typeof body !== "object" || !body.symbol) {
+        return json(res, 400, { error: "INVALID_INPUT", required: { symbol: "BTC/USDT" } });
+      }
+      return json(res, 200, await buildStrategyEvidence({ symbol: body.symbol }));
+    } catch (error) {
+      const status = error?.code === "UNSUPPORTED_SYMBOL" ? 400
+        : error?.code === "OLAXBT_NEXUS_API_KEY_MISSING" ? 503
+          : 502;
+      return json(res, status, {
+        error: error?.code || "OLAXBT_STRATEGY_EVIDENCE_UNAVAILABLE",
+        detail: String(error?.message || error),
+        trading_authority: false,
+        trade_execution: false
+      });
+    }
+  }
+
   if (req.method !== "GET") return json(res, 405, { error: "METHOD_NOT_ALLOWED" });
   if (url.pathname === "/health") return json(res, 200, healthPayload());
   if (url.pathname === "/.well-known/xagent-verification.json") return json(res, 200, verificationPayload());
@@ -56,6 +78,7 @@ http.createServer(async (req, res) => {
   if (url.pathname === "/") return json(res, 200, {
     name: "BHRIGU Bitcoin Temporal Evidence",
     endpoint: "/v1/state",
+    strategy_evidence: "/v1/strategy-evidence",
     windows: "/v1/windows",
     mcp: "/mcp",
     openapi: "/openapi.json",
