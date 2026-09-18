@@ -47,7 +47,7 @@ A reviewer can challenge the service by asking it to:
 
 1. expose the frozen `SEP_10_2026` record and its integrity hash;
 2. compare that record with live Bitcoin reality;
-3. expose `SEP_17_2026` as the next precommitted window;
+3. expose the frozen `SEP_17_2026` precommit and its separately appended post-boundary evidence;
 4. reject a malformed MCP envelope or unsupported version;
 5. prove the running review deployment is bound to the exact declared commit.
 

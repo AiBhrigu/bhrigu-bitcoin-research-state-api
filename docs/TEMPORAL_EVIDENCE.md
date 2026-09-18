@@ -16,7 +16,7 @@ A post-boundary reality observation is now stored in `lib/evidence.mjs` and mirr
 
 ## SEP_17_2026
 
-`lib/window-sep17.mjs` is the second genuine future precommit. Its public proof artifact `evidence/SEP_17_2026_PRECOMMIT.json` is pinned to SHA-256 `19a27baa6c5f55efbfda84782cf4920374c82323f13f6eabce7d63ed2f0a13f2`. Its baseline was captured on 2026-09-10, seven days before the boundary. No post-boundary evidence exists yet. After the boundary, any evidence must be appended; the baseline must not be rewritten.
+`lib/window-sep17.mjs` is the second genuine future precommit. Its public proof artifact `evidence/SEP_17_2026_PRECOMMIT.json` is pinned to SHA-256 `19a27baa6c5f55efbfda84782cf4920374c82323f13f6eabce7d63ed2f0a13f2`. Its baseline was captured on 2026-09-10, seven days before the boundary. The boundary passed without rewriting the baseline. A post-boundary observation captured on 2026-09-18 is appended as `evidence/SEP_17_2026_POSTBOUNDARY.json` and pinned to SHA-256 `fecd283e77fd30f3bed28b5ad5a62476152c640dc6147e5d733750d1cdce335b`. The observation preserves the original Sep 10 baseline, records fresh public Binance BTCUSDT evidence, and independently cross-checks the Bitcoin tip height against mempool.space.
 
 ## Agent value
 
