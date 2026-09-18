@@ -10,7 +10,7 @@ It turns public Bitcoin evidence into a repeatable temporal record:
 
 A live-price endpoint tells an agent what is true now. BHRIGU also preserves what was fixed **before a declared future boundary**, then lets the agent compare that immutable precommit with later reality.
 
-The first real experiment, `SEP_10_2026`, crossed its boundary without rewriting the baseline. A durable post-boundary observation is included. `SEP_17_2026` is the second genuine future precommit.
+Two genuine temporal cycles are now preserved. `SEP_10_2026` crossed its boundary without rewriting the baseline and has durable post-boundary evidence. `SEP_17_2026` was captured seven days before its boundary, crossed that boundary without rewriting the baseline, and now has its own separately appended durable observation.
 
 ## Public interfaces
 

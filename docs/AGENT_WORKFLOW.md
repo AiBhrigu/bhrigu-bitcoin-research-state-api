@@ -44,7 +44,7 @@ Call `bhrigu_compare_window_to_reality` with the same `window_id`.
 
 The response reads fresh public Bitcoin evidence and returns the current BTCUSDT value and current-vs-baseline delta while preserving the locked baseline. The call does not append or mutate evidence.
 
-For a second temporal cycle, repeat the same workflow with `SEP_17_2026`. Until its boundary, it remains a genuine future precommit with zero post-boundary evidence.
+For the second temporal cycle, repeat the same workflow with `SEP_17_2026`. Its baseline was fixed on Sep 10, the Sep 17 boundary passed without rewriting that baseline, and one durable post-boundary observation is now appended. Historical reads before the observation time still expose zero future evidence.
 
 ## Failure behavior
 
