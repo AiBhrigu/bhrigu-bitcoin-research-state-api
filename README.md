@@ -12,6 +12,18 @@ A live-price endpoint tells an agent what is true now. BHRIGU also preserves wha
 
 Two genuine temporal cycles are now preserved. `SEP_10_2026` crossed its boundary without rewriting the baseline and has durable post-boundary evidence. `SEP_17_2026` was captured seven days before its boundary, crossed that boundary without rewriting the baseline, and now has its own separately appended durable observation.
 
+## System lineage
+
+Within the wider **Φ Research Systems** architecture, this repository is a bounded public Bitcoin-specific evidence organ aligned with **Delta**, the verified dynamic-state / observatory role.
+
+It implements a public-safe subset of that pattern:
+
+`SOURCE → TIME → BASELINE / STATE_0 → REALITY / STATE_1 → DELTA → EVIDENCE → MEMORY → BOUNDARY`
+
+This repository is **not** the complete Delta engine and does not expose ORION, private Delta internals, private prompts, evaluators, or unpublished research mechanisms.
+
+Root public authority: [Φ Authority & Authorship Canon](https://github.com/AiBhrigu/AiBhrigu/blob/main/PHI_AUTHORITY_CANON.md)
+
 ## Public interfaces
 
 - `GET /v1/state` — live BTCUSDT + protocol-time state and temporal summary
